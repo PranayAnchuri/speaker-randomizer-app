@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/speaker-randomizer-app/static/css/main.aea3b3fa.css",
-    "main.js": "/speaker-randomizer-app/static/js/main.ff78b656.js",
+    "main.css": "/speaker-randomizer-app/static/css/main.e6c13ad2.css",
+    "main.js": "/speaker-randomizer-app/static/js/main.f2cae186.js",
     "static/js/453.8ab44547.chunk.js": "/speaker-randomizer-app/static/js/453.8ab44547.chunk.js",
     "index.html": "/speaker-randomizer-app/index.html",
-    "main.aea3b3fa.css.map": "/speaker-randomizer-app/static/css/main.aea3b3fa.css.map",
-    "main.ff78b656.js.map": "/speaker-randomizer-app/static/js/main.ff78b656.js.map",
+    "main.e6c13ad2.css.map": "/speaker-randomizer-app/static/css/main.e6c13ad2.css.map",
+    "main.f2cae186.js.map": "/speaker-randomizer-app/static/js/main.f2cae186.js.map",
     "453.8ab44547.chunk.js.map": "/speaker-randomizer-app/static/js/453.8ab44547.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.aea3b3fa.css",
-    "static/js/main.ff78b656.js"
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.f2cae186.js"
   ]
 }
