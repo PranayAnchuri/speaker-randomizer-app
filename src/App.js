@@ -1,5 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react'; // useEffect might not be strictly needed now
-import './App.css';
+import React, { useState, useCallback } from 'react';
+// Removed old './App.css' import, MUI will handle styling primarily
+
+// Material-UI Imports
+import {
+  Container, Box, AppBar, Toolbar, Typography, Button, TextField,
+  List, ListItem, ListItemText, IconButton, Switch, FormControlLabel,
+  CircularProgress, Alert, Dialog, DialogActions, DialogContent,
+  DialogContentText, DialogTitle, CssBaseline, createTheme, ThemeProvider, Link
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 // --- START: Seeded Randomness Utilities (Unchanged) ---
 function mulberry32(seed) {
@@ -32,37 +43,46 @@ function seededShuffle(array, seedHex) {
 
 const DRAND_LATEST_URL = "https://api.drand.sh/public/latest";
 
+// A basic theme can be defined here if needed, or use default
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2', // Example: classic Material Blue
+    },
+    secondary: {
+      main: '#dc004e', // Example: Material Pink
+    },
+  },
+});
+
 function App() {
   const [currentNameInput, setCurrentNameInput] = useState('');
   const [selectedParticipants, setSelectedParticipants] = useState([]);
   
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState(''); // For specific loading messages
+  const [loadingMessage, setLoadingMessage] = useState('');
   const [orderedList, setOrderedList] = useState([]);
   const [error, setError] = useState('');
 
   const [waitForNewRandomness, setWaitForNewRandomness] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
+  const [copySuccess, setCopySuccess] = useState('');
+
 
   const handleAddNames = () => {
     if (!currentNameInput.trim()) return;
-
-    const namesToAdd = currentNameInput
-      .split(',')
-      .map(name => name.trim())
-      .filter(name => name); // Remove empty strings
-
+    const namesToAdd = currentNameInput.split(',').map(name => name.trim()).filter(name => name);
     const uniqueNewNames = namesToAdd.filter(name => !selectedParticipants.includes(name));
-    
     if (uniqueNewNames.length > 0) {
       setSelectedParticipants([...selectedParticipants, ...uniqueNewNames]);
     }
-    setCurrentNameInput(''); // Clear input after adding
+    setCurrentNameInput('');
   };
 
   const handleKeyPressAddName = (event) => {
     if (event.key === 'Enter') {
       handleAddNames();
+      event.preventDefault(); // Prevent form submission if it's part of a form
     }
   };
 
@@ -70,8 +90,8 @@ function App() {
     setSelectedParticipants(selectedParticipants.filter(name => name !== nameToRemove));
   };
 
-  const handleToggleWaitForRandomness = () => {
-    setWaitForNewRandomness(!waitForNewRandomness);
+  const handleToggleWaitForRandomness = (event) => {
+    setWaitForNewRandomness(event.target.checked);
   };
 
   const handleToggleHelp = () => {
@@ -81,6 +101,7 @@ function App() {
   const handleRandomize = useCallback(async () => {
     setError('');
     setOrderedList([]);
+    setCopySuccess('');
 
     if (selectedParticipants.length === 0) {
       setError('Please add at least one participant to randomize.');
@@ -108,7 +129,6 @@ function App() {
       const seedHex = drandData.randomness;
       
       setLoadingMessage('Shuffling names...');
-      // Short delay to allow UI to update message before potential blocking shuffle
       await new Promise(resolve => setTimeout(resolve, 50)); 
 
       const shuffled = seededShuffle(selectedParticipants, seedHex);
@@ -128,137 +148,169 @@ function App() {
     if (orderedList.length === 0) return;
     const listString = orderedList.map((name, index) => `${index + 1}. ${name}`).join('\n');
     navigator.clipboard.writeText(listString)
-      .then(() => alert('List copied to clipboard!'))
+      .then(() => setCopySuccess('List copied to clipboard!'))
       .catch(err => {
         console.error('Failed to copy list: ', err);
-        alert('Failed to copy list. See console for details.');
+        setError('Failed to copy list. See console for details.');
       });
   };
 
-  const HelpSection = () => (
-    <div className="help-section">
-      <h3>What's this all about?</h3>
-      <p>This little app helps you randomize the order of speakers for your meetings or any list of names, really! It uses true randomness from the <a href="https://drand.love/" target="_blank" rel="noopener noreferrer">Drand network</a> (a League of Entropy project) to make sure it's fair.</p>
-      <h4>How to use:</h4>
-      <ol>
-        <li><strong>Add Names:</strong> Type a name in the box and click "Add Name(s)" or press Enter. You can also paste a bunch of names separated by commas (e.g., <code>Alice, Bob, Charlie</code>) and then click the button.</li>
-        <li><strong>Manage List:</strong> Added names will appear below. Click "Remove" next to any name to take it off the list for this session.</li>
-        <li><strong>Randomize:</strong>
-          <ul>
-            <li>The "Wait for Fresh Randomness" toggle (on by default) means the app will pause for about 4 seconds to grab the very latest random value from the Drand network. This is great for maximum unpredictability!</li>
-            <li>If you're in a hurry, toggle it off for an instant shuffle using the most recently available randomness.</li>
-          </ul>
-          Hit the "Randomize Order" button when you're ready!
-        </li>
-        <li><strong>Copy:</strong> Once the order is displayed, click "Copy List" to get a nice numbered list for pasting elsewhere.</li>
-      </ol>
-      <button onClick={handleToggleHelp} className="close-help-btn">Got it!</button>
-    </div>
+  const HelpDialog = () => (
+    <Dialog open={showHelp} onClose={handleToggleHelp} aria-labelledby="help-dialog-title">
+      <DialogTitle id="help-dialog-title">What's this all about?</DialogTitle>
+      <DialogContent>
+        <DialogContentText component="div">
+          <Typography gutterBottom>
+            This little app helps you randomize the order of speakers for your meetings or any list of names, really! It uses true randomness from the <Link href="https://drand.love/" target="_blank" rel="noopener noreferrer">Drand network</Link> (a League of Entropy project) to make sure it's fair.
+          </Typography>
+          <Typography variant="h6" component="h4" gutterBottom sx={{mt: 2}}>How to use:</Typography>
+          <ol>
+            <li><strong>Add Names:</strong> Type a name in the box and click "Add Name(s)" or press Enter. You can also paste a bunch of names separated by commas (e.g., <code>Alice, Bob, Charlie</code>) and then click the button.</li>
+            <li><strong>Manage List:</strong> Added names will appear below. Click the <DeleteIcon fontSize="inherit" /> icon next to any name to take it off the list for this session.</li>
+            <li><strong>Randomize:</strong>
+              <ul>
+                <li>The "Wait for Fresh Randomness" toggle (on by default) means the app will pause for about 4 seconds to grab the very latest random value from the Drand network. This is great for maximum unpredictability!</li>
+                <li>If you're in a hurry, toggle it off for an instant shuffle using the most recently available randomness.</li>
+              </ul>
+              Hit the "Randomize Order!" button when you're ready!
+            </li>
+            <li><strong>Copy:</strong> Once the order is displayed, click "Copy List" to get a nice numbered list for pasting elsewhere.</li>
+          </ol>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleToggleHelp} color="primary" variant="contained">
+          Got it!
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Speaker Order Randomizer</h1>
-        <button onClick={handleToggleHelp} className="help-toggle-btn">
-          {showHelp ? 'Close Help' : 'Help/About'}
-        </button>
-      </header>
+    <ThemeProvider theme={theme}>
+      <CssBaseline /> {/* Normalizes styles across browsers */}
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Speaker Order Randomizer
+          </Typography>
+          <Button color="inherit" onClick={handleToggleHelp} startIcon={<HelpOutlineIcon />}>
+            Help
+          </Button>
+        </Toolbar>
+      </AppBar>
 
-      {showHelp && <HelpSection />}
+      <Container maxWidth="md" sx={{ mt: 3, mb: 3 }}> {/* Main content container */}
+        {showHelp && <HelpDialog />}
 
-      {!showHelp && (
-        <main>
-          <section className="participants-management">
-            <h2>Add Participants:</h2>
-            <div className="add-participant-controls">
-              <input
-                type="text"
-                placeholder="Enter name(s), comma-separated..."
-                value={currentNameInput}
-                onChange={(e) => setCurrentNameInput(e.target.value)}
-                onKeyPress={handleKeyPressAddName}
-                className="name-input"
-              />
-              <button 
-                type="button" 
-                onClick={handleAddNames} 
-                className="add-btn"
-                disabled={!currentNameInput.trim()}
-              >
-                Add Name(s)
-              </button>
-            </div>
-
-            {selectedParticipants.length > 0 && (
-              <div className="current-participants">
-                <h3>Current Participants ({selectedParticipants.length}):</h3>
-                <ul>
-                  {selectedParticipants.map((name, index) => (
-                    <li key={index}>
-                      {name}
-                      <button 
-                        type="button" 
-                        onClick={() => handleRemoveParticipant(name)} 
-                        className="remove-btn-small"
-                      >
-                        Remove
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </section>
-
-          <section className="controls">
-            <div className="toggle-wait-container">
-              <label htmlFor="waitToggle">Wait for Fresh Randomness:</label>
-              <button
-                id="waitToggle"
-                onClick={handleToggleWaitForRandomness}
-                className={`toggle-btn ${waitForNewRandomness ? 'active' : ''}`}
-                aria-pressed={waitForNewRandomness}
-              >
-                {waitForNewRandomness ? 'ON' : 'OFF'}
-              </button>
-              <span className="toggle-info">(~4s delay for new entropy if ON)</span>
-            </div>
-
-            <button 
-              onClick={handleRandomize} 
-              disabled={isLoading || selectedParticipants.length < 1}
-              className="randomize-btn"
+        <Box component="section" sx={{ p: 2, mb: 3, border: theme => `1px solid ${theme.palette.divider}`, borderRadius: 1 }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            Add Participants
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', mb: 2 }}>
+            <TextField
+              label="Enter name(s), comma-separated..."
+              variant="outlined"
+              fullWidth
+              value={currentNameInput}
+              onChange={(e) => setCurrentNameInput(e.target.value)}
+              onKeyPress={handleKeyPressAddName}
+            />
+            <Button 
+              variant="contained" 
+              onClick={handleAddNames} 
+              disabled={!currentNameInput.trim()}
+              sx={{whiteSpace: 'nowrap'}}
             >
-              {isLoading ? 'Randomizing...' : 'Randomize Order!'}
-            </button>
-          </section>
+              Add Name(s)
+            </Button>
+          </Box>
 
-          {isLoading && (
-            <div className="spinner-container">
-              <div className="spinner"></div>
-              <p>{loadingMessage}</p>
-            </div>
-          )}
-
-          {error && <p className="error-message">Error: {error}</p>}
-
-          {orderedList.length > 0 && !isLoading && (
-            <section className="results">
-              <h2>Final Order:</h2>
-              <ol>
-                {orderedList.map((name, index) => (
-                  <li key={index}>{name}</li>
+          {selectedParticipants.length > 0 && (
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>Current Participants ({selectedParticipants.length}):</Typography>
+              <List dense>
+                {selectedParticipants.map((name, index) => (
+                  <ListItem
+                    key={index}
+                    secondaryAction={
+                      <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveParticipant(name)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    }
+                    sx={{borderBottom: theme => `1px solid ${theme.palette.divider}`}}
+                  >
+                    <ListItemText primary={name} />
+                  </ListItem>
                 ))}
-              </ol>
-              <button onClick={copyToClipboard} className="copy-btn">
-                Copy List
-              </button>
-            </section>
+              </List>
+            </Box>
           )}
-        </main>
-      )}
-    </div>
+        </Box>
+
+        <Box component="section" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, p:2, mb:3,  border: theme => `1px solid ${theme.palette.divider}`, borderRadius: 1 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={waitForNewRandomness}
+                onChange={handleToggleWaitForRandomness}
+                color="primary"
+              />
+            }
+            label="Wait for Fresh Randomness (~4s delay if ON)"
+          />
+          <Button 
+            variant="contained" 
+            color="primary"
+            size="large"
+            onClick={handleRandomize} 
+            disabled={isLoading || selectedParticipants.length < 1}
+            sx={{minWidth: '200px'}}
+          >
+            {isLoading ? 'Randomizing...' : 'Randomize Order!'}
+          </Button>
+        </Box>
+
+        {isLoading && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 2 }}>
+            <CircularProgress sx={{mb: 1}}/>
+            <Typography>{loadingMessage}</Typography>
+          </Box>
+        )}
+
+        {error && !isLoading && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
+        {copySuccess && !error && !isLoading && <Alert severity="success" sx={{ my: 2 }}>{copySuccess}</Alert>}
+
+
+        {orderedList.length > 0 && !isLoading && (
+          <Box component="section" sx={{ p:2, border: theme => `1px solid ${theme.palette.divider}`, borderRadius: 1 }}>
+            <Typography variant="h5" component="h2" gutterBottom>
+              Final Order:
+            </Typography>
+            <List>
+              {orderedList.map((name, index) => (
+                <ListItem key={index} sx={{borderBottom: theme => `1px solid ${theme.palette.divider}`}}>
+                  <ListItemText primary={`${index + 1}. ${name}`} />
+                </ListItem>
+              ))}
+            </List>
+            <Button 
+              variant="outlined" 
+              onClick={copyToClipboard} 
+              startIcon={<ContentCopyIcon />}
+              sx={{mt: 2}}
+            >
+              Copy List
+            </Button>
+          </Box>
+        )}
+      </Container>
+      <Box component="footer" sx={{ textAlign: 'center', mt: 4, py: 3, color: 'text.secondary', fontStyle: 'italic', borderTop: theme => `1px solid ${theme.palette.divider}` }}>
+        <Typography variant="caption">
+          This app is <Link href="https://en.wikipedia.org/wiki/Vibe_coding" target="_blank" rel="noopener noreferrer" color="inherit">vibe coded</Link> by <Link href="https://github.com/PranayAnchuri" target="_blank" rel="noopener noreferrer" color="inherit">Pranay</Link>
+        </Typography>
+      </Box>
+    </ThemeProvider>
   );
 }
 
