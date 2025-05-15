@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/speaker-randomizer-app/static/css/main.673310c1.css",
+    "main.js": "/speaker-randomizer-app/static/js/main.5470f383.js",
+    "static/js/453.8ab44547.chunk.js": "/speaker-randomizer-app/static/js/453.8ab44547.chunk.js",
+    "index.html": "/speaker-randomizer-app/index.html",
+    "main.673310c1.css.map": "/speaker-randomizer-app/static/css/main.673310c1.css.map",
+    "main.5470f383.js.map": "/speaker-randomizer-app/static/js/main.5470f383.js.map",
+    "453.8ab44547.chunk.js.map": "/speaker-randomizer-app/static/js/453.8ab44547.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.673310c1.css",
+    "static/js/main.5470f383.js"
+  ]
+}
