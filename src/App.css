@@ -226,3 +226,147 @@ main {
 .add-btn:disabled {
   background-color: #ccc;
 }
+
+/* ... (your existing App.css styles) ... */
+
+.App-header {
+  /* ... existing styles ... */
+  display: flex; /* Align title and help button */
+  justify-content: space-between;
+  align-items: center;
+}
+
+.help-toggle-btn {
+  padding: 8px 12px;
+  font-size: 0.9em;
+  background-color: #6c757d; /* A neutral color */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.help-toggle-btn:hover {
+  background-color: #5a6268;
+}
+
+.help-section {
+  margin: 20px;
+  padding: 20px;
+  background-color: #fdfdfe;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  text-align: left;
+  line-height: 1.6;
+}
+.help-section h3 {
+  margin-top: 0;
+  color: #007bff;
+}
+.help-section h4 {
+  margin-top: 15px;
+  margin-bottom: 5px;
+  color: #333;
+}
+.help-section ol, .help-section ul {
+  padding-left: 20px;
+}
+.help-section code {
+  background-color: #e9ecef;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+.close-help-btn {
+  margin-top: 15px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.close-help-btn:hover {
+  background-color: #0056b3;
+}
+
+
+.name-input {
+  flex-grow: 1; /* Allow input to take available space */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+  min-width: 200px; /* Ensure it doesn't get too small */
+}
+
+.add-participant-controls {
+  /* ... existing styles ... */
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens if needed */
+}
+
+.controls { /* Section for toggle and randomize button */
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.toggle-wait-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* Allow wrapping */
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+}
+.toggle-wait-container label {
+  font-weight: bold;
+  color: #333;
+}
+
+.toggle-btn {
+  padding: 8px 15px;
+  border: 2px solid #ccc;
+  border-radius: 20px; /* Pill shape */
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+  background-color: #fff;
+}
+.toggle-btn.active {
+  background-color: #28a745; /* Green when ON */
+  color: white;
+  border-color: #28a745;
+}
+.toggle-btn:not(.active) {
+  background-color: #dc3545; /* Red when OFF */
+  color: white;
+  border-color: #dc3545;
+}
+
+.toggle-info {
+  font-size: 0.85em;
+  color: #555;
+}
+
+/* Ensure randomize-btn is distinct or well-placed */
+.randomize-btn {
+  /* ... existing styles, ensure it has enough margin if needed ... */
+  width: 100%; /* Make it full width in its container */
+  padding: 15px;
+  font-size: 1.2em;
+}
+
+.current-participants h3 {
+    /* ... existing ... */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Spinner message styling */
+.spinner-container p {
+    color: #333;
+    font-weight: 500;
+}
